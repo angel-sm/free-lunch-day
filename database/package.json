@@ -1,0 +1,29 @@
+{
+  "name": "@devangelsm97/database-free-lunch-day",
+  "version": "1.0.7",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "seed": "ts-node seeds/index.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "files": [
+    "/prisma",
+    ".env"
+  ],
+  "author": "Jose Angel Sanchez Morales",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "prisma": "^5.15.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "@types/uuid": "^9.0.8"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.15.0",
+    "uuid": "^9.0.1"
+  },
+  "description": ""
+}
