@@ -1,4 +1,14 @@
 services:
+  office-application:
+    build:
+      context: ./office
+    container_name: office-application
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -50,13 +60,3 @@ services:
         condition: service_healthy
     ports:
       - "5001:5001"
-
-  office-application:
-    build:
-      context: ./office
-    container_name: office-application
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
