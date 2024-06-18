@@ -19,8 +19,8 @@ export class Repository implements IRepository {
     const recipeMap = {} as RecipeMap
     const recipes = await this.prisma.recipes.findMany({})
 
-    recipes.forEach(recipe => {
-      recipeMap[recipe.id] = recipe.title
+    recipes.forEach((recipe: any) => {
+      recipeMap[recipe?.id] = recipe?.title
     })
 
     const ordersMapped = documents.map(
