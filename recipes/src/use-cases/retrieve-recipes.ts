@@ -1,5 +1,5 @@
-import { Response } from 'express'
 import { IRepository } from '../models/IRepository.model'
+import { Response } from 'express'
 
 export class RetriveRecipes {
   constructor(private repository: IRepository) {}
@@ -8,6 +8,8 @@ export class RetriveRecipes {
     try {
       const recipes = await this.repository.getRecipes()
       response.status(200).send(recipes)
-    } catch (error) {}
+    } catch (error) {
+      response.status(500).send(error)
+    }
   }
 }

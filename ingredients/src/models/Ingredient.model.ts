@@ -36,14 +36,13 @@ export class Ingredient {
     )
 
     if (quantitySold > 0) {
-      sqs.sendMessage(
+      sqs.publishMessage(
         JSON.stringify({
           ingredient: this.ingredient,
           createdAt: new Date(),
           quantity: quantitySold,
         }),
       )
-
       this.existence = this.existence + quantitySold
     }
   }

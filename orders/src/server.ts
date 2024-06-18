@@ -9,8 +9,8 @@ import { SQS } from './utils/sqs.services'
 import { RetrieveOrders } from './use-cases/retrieve-orders.uc'
 import { Controller } from './controllers'
 
-interface SQSList {
-  registryOrderQueue: SQS
+export interface SQSQueues {
+  recipesQueue: SQS
   registryResponseOrderQueue: SQS
   finishOrderQueue: SQS
 }
@@ -20,7 +20,7 @@ export class Server {
   private readonly port: string
   private httpServer?: http.Server
 
-  constructor(port: string) {
+  constructor(port: string, sqs: SQSQueues) {
     this.port = port
     this.express = express()
     this.express.use(
@@ -31,8 +31,13 @@ export class Server {
     )
 
     const repository = new Repository()
-    new RegistryRecipeOrder(repository).run()
-    new FinishRecipeOrder(repository).run()
+    new RegistryRecipeOrder(repository).run({
+      recipesQueue: sqs.recipesQueue,
+      registryResponseOrderQueue: sqs.registryResponseOrderQueue,
+    })
+    new FinishRecipeOrder(repository).run({
+      finishOrderQueue: sqs.finishOrderQueue,
+    })
 
     const retrieveOrders = new RetrieveOrders(repository)
     const controllers = new Controller(retrieveOrders)
@@ -58,6 +63,21 @@ export class Server {
         resolve()
       })
     })
+  }
+
+  static async initSQS() {
+    const recipesQueue = new SQS('recipies_request', 'recipes_queue')
+    const registryResponseOrderQueue = new SQS(
+      'orders_response',
+      'order_response_queue',
+    )
+    const finishOrderQueue = new SQS('orders_finish', 'order_finish_queue')
+
+    return {
+      recipesQueue,
+      registryResponseOrderQueue,
+      finishOrderQueue,
+    }
   }
 
   getHTTPServer() {

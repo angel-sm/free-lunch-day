@@ -10,9 +10,14 @@ import {
 import { useMemo } from "react";
 import { IOrder } from "../../interfaces/Orders";
 import { getOrders } from "../../services/get-orders";
+import { format } from "date-fns";
 
-const Orders = () => {
-  const { data: orders } = useFetch<IOrder[]>(getOrders);
+interface Props {
+  refresh: boolean;
+}
+
+const Orders: React.FC<Props> = ({ refresh }) => {
+  const { data: orders } = useFetch<IOrder[]>(getOrders, refresh);
 
   const columns = useMemo<MRT_ColumnDef<IOrder>[]>(
     () => [
@@ -30,11 +35,25 @@ const Orders = () => {
         accessorKey: "createdAt",
         header: "Created at",
         size: 200,
+        Cell: ({ cell }) => {
+          return (
+            <span>
+              {format(new Date(cell.getValue() as Date), "dd/MM/yyy hh:mm aa")}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "updatedAt",
         header: "Last update",
         size: 200,
+        Cell: ({ cell }) => {
+          return (
+            <span>
+              {format(new Date(cell.getValue() as Date), "dd/MM/yyy hh:mm aa")}
+            </span>
+          );
+        },
       },
     ],
     []

@@ -1,16 +1,23 @@
 import { IRepository } from '../models/IRepository.model'
 import { SQS } from '../utils/sqs.services'
 
-interface OrderId {
-  id: string
+interface RunArgs {
+  finishOrderQueue: SQS
+}
+
+interface Message {
+  order: string
 }
 
 export class FinishRecipeOrder {
   constructor(private repository: IRepository) {}
 
-  async run() {
-    // const order =
-    //   (await this.finishOrderQueue.consumeMessage()) as unknown as OrderId
-    // await this.repository.updateStatusOrder(order.id, 'finish')
+  async run({ finishOrderQueue }: RunArgs) {
+    finishOrderQueue.receiveMessages(async (message: Message) => {
+      await this.repository.updateStatusOrder(message.order, 'finish')
+      console.log(
+        `${new Date().toISOString()} - Order finished: ${message.order}`,
+      )
+    })
   }
 }

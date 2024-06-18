@@ -23,21 +23,22 @@
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.12.0",
     "@typescript-eslint/parser": "^7.12.0",
+    "amqplib": "^0.10.4",
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
+    "nodemon": "^3.1.3",
     "prettier": "^3.3.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "nodemon": "^3.1.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "@devangelsm97/database-free-lunch-day": "^1.0.7",
     "@prisma/client": "^5.15.0",
-    "amqplib": "^0.10.4",
+    "axios": "^1.7.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "http-status": "^1.7.4",
-    "uuid": "^9.0.1",
-    "prisma": "^5.15.0"
+    "prisma": "^5.15.0",
+    "uuid": "^9.0.1"
   }
 }

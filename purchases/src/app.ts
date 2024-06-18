@@ -1,11 +1,12 @@
-import { Server } from './server'
+import { SQSQueues, Server } from './server'
 
 export class App {
   server?: Server
 
   async start() {
     const port = process.env.PORT ?? '5002'
-    this.server = new Server(port)
+    const sqs = (await Server.initSQS()) as SQSQueues
+    this.server = new Server(port, sqs)
     await this.server.listen()
   }
 

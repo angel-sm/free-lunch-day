@@ -6,13 +6,18 @@ import { Repository } from './data-access/mongo.repository'
 import { RegistryIngredientPurchase } from './use-cases/registry-ingredient-purchase'
 import { RetirevePurchases } from './use-cases/retrieve-purchases.uc'
 import { Controller } from './controllers'
+import { SQS } from './utils/sqs.services'
+
+export interface SQSQueues {
+  purchaseQueue: SQS
+}
 
 export class Server {
   private readonly express: express.Express
   private readonly port: string
   private httpServer?: http.Server
 
-  constructor(port: string) {
+  constructor(port: string, sqs: SQSQueues) {
     this.port = port
     this.express = express()
     this.express.use(
@@ -23,7 +28,9 @@ export class Server {
     )
 
     const repository = new Repository()
-    new RegistryIngredientPurchase(repository).run()
+    new RegistryIngredientPurchase(repository).run({
+      purchaseQueue: sqs.purchaseQueue,
+    })
 
     const retrievePurchases = new RetirevePurchases(repository)
     const controllers = new Controller(retrievePurchases)
@@ -49,6 +56,14 @@ export class Server {
         resolve()
       })
     })
+  }
+
+  static async initSQS() {
+    const purchaseQueue = new SQS('ingredient_purchase', 'purchases_queue')
+    purchaseQueue.connect()
+    return {
+      purchaseQueue,
+    }
   }
 
   getHTTPServer() {

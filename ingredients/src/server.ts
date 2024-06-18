@@ -5,13 +5,13 @@ import cors from 'cors'
 import { Repository } from './data-access/mongo.repository'
 import { Controller } from './controllers'
 import { ValidateIngredientsExistence } from './use-cases/validate-ingredients-existence.uc'
-import { SQS } from './utils/sqs.services'
 import { RetrieveIngredients } from './use-cases/retrieve-ingredients.uc'
+import { SQS } from './utils/sqs.services'
 
-interface SQSList {
-  ingredientsQueue: SQS
-  ingredientsResponseQueue: SQS
+export interface SQSQueues {
+  recipesQueue: SQS
   purchaseQueue: SQS
+  ingredientsQueue: SQS
 }
 
 export class Server {
@@ -19,7 +19,7 @@ export class Server {
   private readonly port: string
   private httpServer?: http.Server
 
-  constructor(port: string, sqsList: SQSList) {
+  constructor(port: string, sqs: SQSQueues) {
     this.port = port
     this.express = express()
     this.express.use(
@@ -30,12 +30,11 @@ export class Server {
     )
 
     const repository = new Repository()
-    new ValidateIngredientsExistence(
-      repository,
-      sqsList.ingredientsQueue,
-      sqsList.ingredientsResponseQueue,
-      sqsList.purchaseQueue,
-    ).run()
+    new ValidateIngredientsExistence(repository).run({
+      recipesQueue: sqs.recipesQueue,
+      ingredientsQueue: sqs.ingredientsQueue,
+      purchaseQueue: sqs.purchaseQueue,
+    })
 
     const retrieveIngredients = new RetrieveIngredients(repository)
     const controllers = new Controller(retrieveIngredients)
@@ -63,19 +62,22 @@ export class Server {
     })
   }
 
-  static async initRabbitMq() {
-    const ingredientsQueue = new SQS('ingredients_queue')
-    const ingredientsResponseQueue = new SQS('ingredients_response_queue')
-    const purchaseQueue = new SQS('purchases_queue')
+  static async initSQS() {
+    const recipesQueue = new SQS('recipies_request', 'ingredients_queue')
+    const ingredientsQueue = new SQS(
+      'ingredients_response',
+      'ingredients_response_queue',
+    )
+    const purchaseQueue = new SQS('ingredient_purchase', 'purchases_queue')
 
+    await recipesQueue.connect()
     await ingredientsQueue.connect()
-    await ingredientsResponseQueue.connect()
     await purchaseQueue.connect()
 
     return {
-      ingredientsQueue,
-      ingredientsResponseQueue,
+      recipesQueue,
       purchaseQueue,
+      ingredientsQueue,
     }
   }
 

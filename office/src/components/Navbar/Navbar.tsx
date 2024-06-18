@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import styled from "styled-components";
 import { Flex } from "../../styled-components/grid";
 import { Rice } from "../../assets/icons";
@@ -33,7 +34,6 @@ export const Nabvar = () => {
           <a href="#purchases" onClick={handleSmoothScroll}>
             Purchases
           </a>
-          <button>Claim lunch</button>
         </MenuContainer>
       </ContainerControl>
     </Container>

@@ -10,13 +10,21 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { IPurchase } from "../../interfaces/Purchase";
 import { getPurchases } from "../../services/get-purchases";
+import { format } from "date-fns";
 
-const Purchases = () => {
-  const { data: ingredients } = useFetch<IIngredient[]>(getIngredients);
-  const { data: purchases } = useFetch<IPurchase[]>(getPurchases);
+interface Props {
+  refresh: boolean;
+}
+
+const Purchases: React.FC<Props> = ({ refresh }) => {
+  const { data: ingredients } = useFetch<IIngredient[]>(
+    getIngredients,
+    refresh
+  );
+  const { data: purchases } = useFetch<IPurchase[]>(getPurchases, refresh);
 
   const columns = useMemo<MRT_ColumnDef<IPurchase>[]>(
     () => [
@@ -34,6 +42,13 @@ const Purchases = () => {
         accessorKey: "createdAt",
         header: "Purchased at",
         size: 200,
+        Cell: ({ cell }) => {
+          return (
+            <span>
+              {format(new Date(cell.getValue() as Date), "dd/MM/yyy hh:mm aa")}
+            </span>
+          );
+        },
       },
     ],
     []

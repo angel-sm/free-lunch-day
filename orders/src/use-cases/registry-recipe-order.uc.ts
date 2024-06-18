@@ -3,31 +3,33 @@ import { IRepository } from '../models/IRepository.model'
 import { Order } from '../models/Order.model'
 import { SQS } from '../utils/sqs.services'
 
-export class RegistryRecipeOrder {
-  registryOrderQueue: SQS
+interface Message {
+  recipe: IRecipe
+  order: string
+}
+
+interface RunArgs {
+  recipesQueue: SQS
   registryResponseOrderQueue: SQS
+}
 
-  constructor(private repository: IRepository) {
-    this.registryOrderQueue = new SQS('registry_order_queue')
-    this.registryResponseOrderQueue = new SQS('registry_response_order_queue')
-  }
+export class RegistryRecipeOrder {
+  constructor(private repository: IRepository) {}
 
-  async run() {
-    try {
-      await this.registryOrderQueue.connect()
-      await this.registryResponseOrderQueue.connect()
+  async run({ recipesQueue, registryResponseOrderQueue }: RunArgs) {
+    console.log('New order recibed')
 
-      this.registryOrderQueue.consumeMessage(async (recipeMessage: any) => {
-        const recipe = recipeMessage as IRecipe
+    await recipesQueue.receiveMessages(async (message: Message) => {
+      try {
+        console.log(`${new Date().toISOString()} - New order`)
 
-        const order = new Order('progress', recipe.id)
-
+        const order = new Order(message.order, 'progress', message.recipe.id)
         await this.repository.storeOrder(order)
 
-        await this.registryResponseOrderQueue.sendMessage(JSON.stringify(order))
-      })
-    } catch (error) {
-      console.error('🚀 ~ RegistryRecipeOrder ~ run ~ error:', error)
-    }
+        await registryResponseOrderQueue.publishMessage(JSON.stringify(order))
+      } catch (error) {
+        console.log('🚀 ~ ~ error:', error)
+      }
+    })
   }
 }

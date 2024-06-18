@@ -55,5 +55,8 @@ services:
     build:
       context: ./office
     container_name: office-application
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "3000:3000"

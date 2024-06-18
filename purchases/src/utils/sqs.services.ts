@@ -1,50 +1,64 @@
 import * as amqp from 'amqplib'
+import { v4 } from 'uuid'
 
 export class SQS {
-  private channel: amqp.Channel | undefined
-  private connection: amqp.Connection | undefined
+  constructor(
+    private exchange: string,
+    private queue: string,
+  ) {}
 
-  constructor(private queue: string) {}
-
-  getQueue() {
-    return this.queue
+  async connect() {
+    const connection = await amqp.connect('amqp://localhost')
+    const channel = await connection.createChannel()
+    await channel.assertExchange(this.exchange, 'fanout', {
+      durable: true,
+    })
+    await channel.assertQueue(this.queue)
+    await channel.bindQueue(this.queue, this.exchange, '')
   }
 
-  async connect(host?: string) {
-    this.connection = await amqp.connect(
-      host ?? 'amqp://rabbitmq:5672',
-      (error: any) => {
-        if (error) {
-          console.log(error)
+  async publishMessage(message: string) {
+    const connection = await amqp.connect('amqp://localhost')
+    const channel = await connection.createChannel()
+    const correlationId = v4()
+
+    await channel.assertQueue(this.queue)
+    await channel.bindQueue(this.queue, this.exchange, 'routing_key')
+    await channel.assertExchange(this.exchange, 'fanout', { durable: true })
+    channel.publish(this.exchange, '', Buffer.from(message), {
+      correlationId,
+      replyTo: this.queue,
+    })
+
+    setTimeout(() => {
+      connection.close()
+    }, 500)
+  }
+
+  async receiveMessages(cb: any) {
+    const connection = await amqp.connect('amqp://localhost')
+    const channel = await connection.createChannel()
+
+    await channel.assertExchange(this.exchange, 'fanout', {
+      durable: true,
+    })
+    await channel.assertQueue(this.queue, { durable: true })
+    await channel.bindQueue(this.queue, this.exchange, '')
+
+    console.log(
+      `[*] Microservice A is waiting for messages. To exit press CTRL+C`,
+    )
+
+    channel.consume(
+      this.queue,
+      async (msg: any) => {
+        if (msg?.content) {
+          channel.ack(msg)
+          const message = JSON.parse(msg.content.toString())
+          await cb(message, channel)
         }
       },
+      { noAck: false },
     )
-    const channel = await this.connection.createChannel()
-    await channel.assertQueue(this.queue)
-    this.channel = channel
-  }
-
-  sendMessage(message: any) {
-    if (!this.channel) {
-      throw new Error('Channel undefined')
-    }
-
-    try {
-      this.channel?.sendToQueue(this.queue, Buffer.from(message))
-    } catch (error) {
-      console.error(`Failed to send message to queue ${this.queue}:`, error)
-      throw error
-    }
-  }
-
-  async consumeMessage(cb: any) {
-    this.channel?.consume(this.queue, msg => {
-      if (msg) {
-        cb(JSON.parse(msg.content.toString()))
-        this.channel?.ack(msg)
-      } else {
-        throw new Error('Failed to consume message from queue')
-      }
-    })
   }
 }

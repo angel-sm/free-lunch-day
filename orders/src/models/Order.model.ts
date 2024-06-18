@@ -1,16 +1,15 @@
 import { v4 } from 'uuid'
 
 export class Order {
-  private id: string
   private createdAt: Date
   private updatedAt: Date
 
   constructor(
+    private id: string,
     private status: 'progress' | 'finish',
     private recipe: string,
     createdAt?: Date,
   ) {
-    this.id = v4()
     this.createdAt = createdAt ?? new Date()
     this.updatedAt = new Date()
   }

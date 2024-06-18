@@ -1,22 +1,26 @@
+import * as amqplib from 'amqplib'
 import { IIngredient } from '../interfaces/IIngredient'
 import { IRepository } from '../models/IRepository.model'
 import { Purchase } from '../models/Purchase.model'
 import { SQS } from '../utils/sqs.services'
 
-export class RegistryIngredientPurchase {
+interface RunArgs {
   purchaseQueue: SQS
+}
 
-  constructor(private repository: IRepository) {
-    this.purchaseQueue = new SQS('purchases_queue')
-  }
+export class RegistryIngredientPurchase {
+  constructor(private repository: IRepository) {}
 
-  async run() {
-    await this.purchaseQueue.connect()
-    this.purchaseQueue.consumeMessage(async (ingredient: IIngredient) => {
-      const purchase = new Purchase(ingredient.ingredient, ingredient.quantity)
-      await this.repository.storePurchase(purchase)
-
-      console.log('Purchase stored')
-    })
+  async run({ purchaseQueue }: RunArgs) {
+    await purchaseQueue.receiveMessages(
+      async (ingredient: IIngredient, channel: amqplib.Channel) => {
+        console.log(`${new Date().toISOString()} - New Purchase`)
+        const purchase = new Purchase(
+          ingredient.ingredient,
+          ingredient.quantity,
+        )
+        await this.repository.storePurchase(purchase)
+      },
+    )
   }
 }

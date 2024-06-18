@@ -7,7 +7,7 @@ interface UseFetchResult<T> {
   error: string | null;
 }
 
-const useFetch = <T>(url: string): UseFetchResult<T> => {
+const useFetch = <T>(url: string, refresh?: boolean): UseFetchResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ const useFetch = <T>(url: string): UseFetchResult<T> => {
     };
 
     fetchData();
-  }, [url]);
+  }, [url, refresh]);
 
   return { data, loading, error };
 };

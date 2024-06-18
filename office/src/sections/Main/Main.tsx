@@ -4,13 +4,23 @@ import { Flex } from "../../styled-components/grid";
 import { TitleH1 } from "../../styled-components/titles";
 import Background from "../../components/Background";
 import { claimLunch } from "../../services/claim-lunch";
-import usePost from "../../hooks/usePost";
+import { toast } from "sonner";
+import axios from "axios";
 
-const Main: React.FC = () => {
-  const { post } = usePost<any>(claimLunch);
+interface Props {
+  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
+const Main: React.FC<Props> = ({ setRefresh }) => {
   const handleClaim = async () => {
-    await post({});
+    toast.promise(axios.post(claimLunch), {
+      loading: "Cooking your recipe!",
+      success: ({ data }) => {
+        return `Enjoy of ${data.title}`;
+      },
+      error: "Error",
+    });
+    setRefresh((old: boolean) => !old);
   };
 
   return (
