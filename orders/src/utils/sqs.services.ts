@@ -31,13 +31,12 @@ export class SQS {
       replyTo: this.queue,
     })
 
-    // console.log(`[A] Sent '${message}' to exchange '${this.exchange}'`)
     setTimeout(() => {
       connection.close()
     }, 500)
   }
 
-  async receiveMessages(cb: any, response?: Response) {
+  async receiveMessages(cb: any) {
     const connection = await amqp.connect('amqp://localhost')
     const channel = await connection.createChannel()
 
@@ -57,7 +56,6 @@ export class SQS {
         if (msg?.content) {
           channel.ack(msg)
           await cb(JSON.parse(msg.content.toString()))
-          // await channel.close()
         }
       },
       { noAck: false },
