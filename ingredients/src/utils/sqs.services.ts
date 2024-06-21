@@ -8,7 +8,7 @@ export class SQS {
   ) {}
 
   async connect() {
-    const connection = await amqp.connect('amqp://localhost')
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
     await channel.assertExchange(this.exchange, 'fanout', {
       durable: true,
@@ -18,7 +18,7 @@ export class SQS {
   }
 
   async publishMessage(message: string) {
-    const connection = await amqp.connect('amqp://localhost')
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
     const correlationId = v4()
 
@@ -36,7 +36,7 @@ export class SQS {
   }
 
   async receiveMessages(cb: any) {
-    const connection = await amqp.connect('amqp://localhost')
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
 
     await channel.assertExchange(this.exchange, 'fanout', {
