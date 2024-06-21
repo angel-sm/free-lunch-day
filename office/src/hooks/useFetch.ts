@@ -15,7 +15,11 @@ const useFetch = <T>(url: string, refresh?: boolean): UseFetchResult<T> => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response: AxiosResponse<T> = await axios.get(url);
+        const response: AxiosResponse<T> = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
         setData(response.data);
       } catch (err) {
         if (axios.isAxiosError(err) && err.response) {
