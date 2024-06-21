@@ -18,7 +18,11 @@ const usePost = <T>(url: string) => {
   const post = async (postData: any): Promise<void> => {
     setState({ ...state, loading: true });
     try {
-      const response: AxiosResponse<T> = await axios.post(url, postData);
+      const response: AxiosResponse<T> = await axios.post(url, postData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       setState({ data: response.data, error: null, loading: false });
     } catch (err) {
       setState({ data: null, error: err as AxiosError, loading: false });
