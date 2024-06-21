@@ -70,6 +70,7 @@ export class Server {
     await recipesQueue.connect()
     await registryOrderQueue.connect()
     await ingredientsQueue.connect()
+    await finishOrderQueue.connect()
 
     return {
       recipesQueue,
