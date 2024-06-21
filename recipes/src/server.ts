@@ -26,7 +26,6 @@ export class Server {
     this.express.use(
       cors({
         origin: '*',
-        credentials: true,
       }),
     )
 
