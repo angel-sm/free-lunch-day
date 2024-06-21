@@ -2,14 +2,17 @@ import express, { type Request, type Response } from 'express'
 import type * as http from 'http'
 import httpStatus from 'http-status'
 import cors from 'cors'
-import { Repository } from './data-access/mongo.repository'
-import { RegistryIngredientPurchase } from './use-cases/registry-ingredient-purchase'
-import { RetirevePurchases } from './use-cases/retrieve-purchases.uc'
 import { Controller } from './controllers'
+import { Repository } from './data-access/mongo.repository'
+import { PreprareRecipe } from './use-cases/prepare-recipe'
+import { RetriveRecipes } from './use-cases/retrieve-recipes'
 import { SQS } from './utils/sqs.services'
 
 export interface SQSQueues {
-  purchaseQueue: SQS
+  recipesQueue: SQS
+  registryOrderQueue: SQS
+  finishOrderQueue: SQS
+  ingredientsQueue: SQS
 }
 
 export class Server {
@@ -23,20 +26,25 @@ export class Server {
     this.express.use(
       cors({
         origin: '*',
-        credentials: true,
       }),
     )
 
     const repository = new Repository()
-    new RegistryIngredientPurchase(repository).run({
-      purchaseQueue: sqs.purchaseQueue,
-    })
+    const preprareRecipe = new PreprareRecipe(repository)
+    const retrieveRecipes = new RetriveRecipes(repository)
 
-    const retrievePurchases = new RetirevePurchases(repository)
-    const controllers = new Controller(retrievePurchases)
+    const recipeController = new Controller(
+      preprareRecipe,
+      retrieveRecipes,
+      sqs,
+    )
 
-    this.express.get('/purchases', async (request, reply) =>
-      controllers.retrievePurchasesHandler(request, reply),
+    this.express.get('/recipes', async (request, reply) =>
+      recipeController.retrieveRecipesHandler(request, reply),
+    )
+
+    this.express.post('/recipes', async (request, reply) =>
+      recipeController.prepareRecipeHandler(request, reply),
     )
 
     this.express.use(
@@ -44,6 +52,31 @@ export class Server {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err.message)
       },
     )
+  }
+
+  static async initSQS() {
+    const recipesQueue = new SQS('recipies_request', 'recipes_queue')
+    const registryOrderQueue = new SQS(
+      'orders_response',
+      'order_response_queue',
+    )
+    const finishOrderQueue = new SQS('orders_finish', 'order_finish_queue')
+    const ingredientsQueue = new SQS(
+      'ingredients_response',
+      'ingredients_response_queue',
+    )
+
+    await recipesQueue.connect()
+    await registryOrderQueue.connect()
+    await ingredientsQueue.connect()
+    await finishOrderQueue.connect()
+
+    return {
+      recipesQueue,
+      registryOrderQueue,
+      finishOrderQueue,
+      ingredientsQueue,
+    }
   }
 
   async listen(): Promise<void> {
@@ -56,14 +89,6 @@ export class Server {
         resolve()
       })
     })
-  }
-
-  static async initSQS() {
-    const purchaseQueue = new SQS('ingredient_purchase', 'purchases_queue')
-    purchaseQueue.connect()
-    return {
-      purchaseQueue,
-    }
   }
 
   getHTTPServer() {
