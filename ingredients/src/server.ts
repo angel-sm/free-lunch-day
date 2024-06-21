@@ -39,7 +39,7 @@ export class Server {
     const controllers = new Controller(retrieveIngredients)
 
     this.express.get('/ingredients', async (request, reply) =>
-      controllers.retrieveRecipesHandler(request, reply),
+      controllers.retrieveIngredientsHandler(request, reply),
     )
 
     this.express.use(
