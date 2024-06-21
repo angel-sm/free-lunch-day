@@ -38,13 +38,13 @@ export class PreprareRecipe {
 
       return new Promise(async resolve => {
         await ingredientsQueue.receiveMessages(async (message: any) => {
-          await finishOrderQueue.publishMessage(
+          finishOrderQueue.publishMessage(
             JSON.stringify({
               order,
             }),
           )
-          resolve(recipe)
           console.log('Ingredientes recividos')
+          resolve(recipe)
         })
       })
     } catch (error) {

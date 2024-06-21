@@ -10,14 +10,14 @@ export class Repository implements IRepository {
     const recipes = documents.map(
       (recipes: any) =>
         new Recipe(
-          recipes.id,
-          recipes.title,
-          recipes.description,
-          recipes.ingredients,
-          recipes.instructions,
-          recipes.cover,
-          recipes.createdAt,
-          recipes.updatedAt,
+          recipes?.id,
+          recipes?.title,
+          recipes?.description,
+          recipes?.ingredients,
+          recipes?.instructions,
+          recipes?.cover,
+          recipes?.createdAt,
+          recipes?.updatedAt,
         ),
     )
     return recipes

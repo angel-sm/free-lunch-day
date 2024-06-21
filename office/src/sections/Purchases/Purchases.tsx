@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Flex } from "../../styled-components/grid";
 import Ingredient from "../../components/Ingredient/Ingredient";
 import useFetch from "../../hooks/useFetch";
-import { getIngredients } from "../../services/get-ingredients";
+import { getIngredients } from "../../services/ingredients";
 import { IIngredient } from "../../interfaces/Ingredient";
 import { TitleH1 } from "../../styled-components/titles";
 import {
@@ -12,7 +12,7 @@ import {
 } from "material-react-table";
 import React, { useMemo } from "react";
 import { IPurchase } from "../../interfaces/Purchase";
-import { getPurchases } from "../../services/get-purchases";
+import { getPurchases } from "../../services/purchases";
 import { format } from "date-fns";
 
 interface Props {

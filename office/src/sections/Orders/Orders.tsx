@@ -9,7 +9,7 @@ import {
 } from "material-react-table";
 import { useMemo } from "react";
 import { IOrder } from "../../interfaces/Orders";
-import { getOrders } from "../../services/get-orders";
+import { getOrders } from "../../services/orders";
 import { format } from "date-fns";
 
 interface Props {

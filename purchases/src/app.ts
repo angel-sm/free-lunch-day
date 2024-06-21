@@ -4,7 +4,7 @@ export class App {
   server?: Server
 
   async start() {
-    const port = process.env.PORT ?? '5002'
+    const port = process.env.PORT ?? '5003'
     const sqs = (await Server.initSQS()) as SQSQueues
     this.server = new Server(port, sqs)
     await this.server.listen()

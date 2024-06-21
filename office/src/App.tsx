@@ -12,6 +12,7 @@ function App() {
 
   return (
     <>
+      {import.meta.env.RECIPES_INGREDIENTS_URL}
       <Toaster />
       <Navbar />
       <Main setRefresh={setRefresh} />

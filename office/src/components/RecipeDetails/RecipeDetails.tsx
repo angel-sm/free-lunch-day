@@ -6,7 +6,6 @@ interface Props {
 }
 
 const RecipeDetails: React.FC<Props> = ({ recipe }) => {
-  console.log("🚀 ~ recipe:", recipe);
   return (
     <Card>
       <Image src={recipe.cover} alt="Recipe Image" />

@@ -9,7 +9,7 @@ export class SQS {
   ) {}
 
   async connect() {
-    const connection = await amqp.connect('amqp://localhost')
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
     await channel.assertExchange(this.exchange, 'fanout', {
       durable: true,
@@ -19,7 +19,7 @@ export class SQS {
   }
 
   async publishMessage(message: string) {
-    const connection = await amqp.connect('amqp://localhost')
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
     const correlationId = v4()
 
@@ -31,14 +31,13 @@ export class SQS {
       replyTo: this.queue,
     })
 
-    // console.log(`[A] Sent '${message}' to exchange '${this.exchange}'`)
     setTimeout(() => {
       connection.close()
     }, 500)
   }
 
-  async receiveMessages(cb: any, response?: Response) {
-    const connection = await amqp.connect('amqp://localhost')
+  async receiveMessages(cb: any) {
+    const connection = await amqp.connect('amqp://rabbitmq:5672')
     const channel = await connection.createChannel()
 
     await channel.assertExchange(this.exchange, 'fanout', {
@@ -57,7 +56,7 @@ export class SQS {
         if (msg?.content) {
           channel.ack(msg)
           await cb(JSON.parse(msg.content.toString()))
-          await channel.close()
+          channel.close()
         }
       },
       { noAck: false },

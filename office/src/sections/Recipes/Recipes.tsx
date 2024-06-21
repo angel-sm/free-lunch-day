@@ -3,8 +3,9 @@ import { Flex } from "../../styled-components/grid";
 import RecipeDetails from "../../components/RecipeDetails";
 import { TitleH1 } from "../../styled-components/titles";
 import useFetch from "../../hooks/useFetch";
-import { getRecipes } from "../../services/get-recipes";
+import { getRecipes } from "../../services/recipes";
 import { IRecipe } from "../../interfaces/Recipes";
+import Spinner from "../../components/Spinner";
 
 const Recipes: React.FC = () => {
   const { data: recipes, loading, error } = useFetch<IRecipe[]>(getRecipes);
@@ -14,6 +15,12 @@ const Recipes: React.FC = () => {
       {recipes &&
         recipes.length &&
         recipes.map((recipe) => <RecipeDetails recipe={recipe} />)}
+    </RecipesContainer>
+  );
+
+  const loaderContainer = (
+    <RecipesContainer direction="column">
+      <Spinner />
     </RecipesContainer>
   );
 
@@ -27,7 +34,7 @@ const Recipes: React.FC = () => {
         <Flex content="center" items="center">
           <SectionTitle>Recipes</SectionTitle>
         </Flex>
-        {loading ? <h1>Cargando</h1> : RecipesContainerSection}
+        {loading ? loaderContainer : RecipesContainerSection}
       </ContainerControl>
     </MainContainer>
   );

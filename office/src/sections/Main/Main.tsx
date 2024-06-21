@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Flex } from "../../styled-components/grid";
 import { TitleH1 } from "../../styled-components/titles";
 import Background from "../../components/Background";
-import { claimLunch } from "../../services/claim-lunch";
+import { claimLunch } from "../../services/recipes";
 import { toast } from "sonner";
 import axios from "axios";
 
