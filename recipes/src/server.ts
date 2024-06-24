@@ -53,7 +53,7 @@ export class Server {
       recipeController.retrieveRecipesHandler(request, reply),
     )
 
-    this.express.post('/recipes', async (request, reply) =>
+    this.express.post('/prepare', async (request, reply) =>
       recipeController.prepareRecipeHandler(request, reply),
     )
 
